@@ -54,12 +54,10 @@ def onehotify(target_list):
     return res
 
 with open("TestEmbeddings/TestDataNumerical.pkl", "wb") as file:
-    #pickle.dump(shuffled_target_list, file)
-    pass
+    pickle.dump(shuffled_target_list, file)
 
 with open("TestEmbeddings/TestDataOneHot.pkl","wb") as file:
-    #pickle.dump(onehotify(shuffled_target_list), file)
-    pass
+    pickle.dump(onehotify(shuffled_target_list), file)
 
 print("Saved Target Data")
 # Other Embeddings Options
