@@ -11,7 +11,7 @@ train_data = json.load(train_file)
 
 def str_to_list(row):
     row1 = row.split(":")
-    row2 = row1[1].split(",")
+    row2 = row1[-1].split(",")
 
     for i in range(len(row2)):
         temp = row2[i]
@@ -23,12 +23,14 @@ def str_to_list(row):
 #print(str_to_list("Types of Conflict: External, Internal, Interpersonal, Ideological"))
     
 puzzle_list = []
-
+#print(train_data)
 for i in range(0, len(train_data), 4):
     puzzle = [str_to_list(train_data[i + j]) for j in range(4)]
+    #print(puzzle)
 
     puzzle_list.append(puzzle)
-    print(i)
+
+#print(puzzle_list)
 
 shuffled_puzzle_list = []
 shuffled_target_list = []
