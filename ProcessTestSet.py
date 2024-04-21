@@ -5,8 +5,8 @@ import ast
 import gensim
 import gensim.downloader as api
 import pickle
-
-
+from transformers import BertModel, BertTokenizer
+import torch
 random.seed(42)
 
 test_df = pd.read_csv('Data/test_dataset.csv')
@@ -53,18 +53,44 @@ def onehotify(target_list):
     
     return res
 
-with open("TestEmbeddings/TestDataNumerical.pkl", "wb") as file:
-    pickle.dump(shuffled_target_list, file)
+# with open("TestEmbeddings/TestDataNumerical.pkl", "wb") as file:
+#     pickle.dump(shuffled_target_list, file)
 
-with open("TestEmbeddings/TestDataOneHot.pkl","wb") as file:
-    pickle.dump(onehotify(shuffled_target_list), file)
+# with open("TestEmbeddings/TestDataOneHot.pkl","wb") as file:
+#     pickle.dump(onehotify(shuffled_target_list), file)
 
 print("Saved Target Data")
 # Other Embeddings Options
 # glove-wiki-gigaword-300
 # glove-twitter-200
 
-def getInputEmbeddings(puzzle_list, file_path, model_str = "word2vec-google-news-300"):
+model = BertModel.from_pretrained('bert-base-uncased')
+tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+
+def getBERTEmbeddings(puzzle_list, file_path):
+    embedded_puzzles = []
+    
+    for puzzle in puzzle_list:
+        temp_puzzle = []
+
+        for word in puzzle:
+            word = word.lower()
+            token = tokenizer.tokenize(word)
+
+            word_id = tokenizer.convert_tokens_to_ids(token)
+            word_id = torch.tensor(word_id).unsqueeze(0)
+            outputs = model(word_id)
+            word_embedding = outputs.last_hidden_state[0]
+
+            temp_puzzle.append(word_embedding.detach().numpy())
+        
+        embedded_puzzles.append(temp_puzzle)
+    
+    with open(file_path, "wb") as file:
+        pickle.dump(embedded_puzzles, file)
+
+
+def getInputEmbeddings(puzzle_list, file_path, model_str):
     word_vectors = api.load(model_str)
 
     embedded_puzzles = []
@@ -87,11 +113,14 @@ def getInputEmbeddings(puzzle_list, file_path, model_str = "word2vec-google-news
     
     with open(file_path, "wb") as file:
         pickle.dump(embedded_puzzles, file)
-    
 
+        
+    
+getBERTEmbeddings(shuffled_puzzle_list, "TestEmbeddings/InputBERT.pkl")
+print("Saved BERT Embeddings")
 #getInputEmbeddings(shuffled_puzzle_list, "TestEmbeddings/InputWord2Vec.pkl", "word2vec-google-news-300")
 #print("Saved Word2Vec Embeddings")
-getInputEmbeddings(shuffled_puzzle_list, "TestEmbeddings/InputGloveWiki.pkl", "glove-wiki-gigaword-300")
-print("Saved Glove Wiki Embeddings")
-getInputEmbeddings(shuffled_puzzle_list, "TestEmbeddings/InputGloveTwitter.pkl", "glove-twitter-200")
-print("Saved Glove twitter embeddings")
+#getInputEmbeddings(shuffled_puzzle_list, "TestEmbeddings/InputGloveWiki.pkl", "glove-wiki-gigaword-300")
+#print("Saved Glove Wiki Embeddings")
+#getInputEmbeddings(shuffled_puzzle_list, "TestEmbeddings/InputGloveTwitter.pkl", "glove-twitter-200")
+#print("Saved Glove twitter embeddings")
