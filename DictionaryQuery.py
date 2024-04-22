@@ -1,35 +1,20 @@
-import requests
+import nltk
+
+nltk.download('wordnet')
+
+from nltk.corpus import wordnet
 
 def get_definitions(word):
-    url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}"
+    synsets = wordnet.synsets(word)
 
-    try:
-        response = requests.get(url)
-        response.raise_for_status() 
-        data = response.json()
+    definitions = ""
 
-        definitions = []
+    for synset in synsets:
+        definitions += f"{synset.name().split('.')[0]}: {synset.definition()}\n"
 
-        if isinstance(data, list):
-            for entry in data:
-                if 'meanings' in entry:
-                    meanings = entry['meanings']
+    return definitions.strip()
 
-                    for meaning in meanings:
-                        if 'definitions' in meaning:
-                            for temp in meaning['definitions']:
-                                definitions.append(temp['definition'])
-
-        if definitions:
-            return ''.join(definitions)
-        
-        else:
-            return "No definitions found for this word."
-        
-    except requests.exceptions.RequestException as e:
-        raise Exception(f"Error fetching data: {e}")
-
-word = "model"
+word = "apple"
 
 try:
     definitions = get_definitions(word)

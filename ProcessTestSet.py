@@ -7,11 +7,9 @@ import gensim.downloader as api
 import pickle
 from transformers import BertModel, BertTokenizer
 import torch
-import requests
 import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
-from nltk.stem import PorterStemmer
 import string
 from DictionaryQuery import get_definitions
 
@@ -144,12 +142,18 @@ def getInputEmbeddingsDict(puzzle_list, file_path, model_str):
     embedded_puzzles = []
     test_vec = word_vectors["apple"]
 
+    out = 0
     for puzzle in puzzle_list:
+        out += 1
+        print(out)
         temp_puzzle = []
 
         for word in puzzle:
             word = word.lower()
-            dict_str = get_definitions(word)
+            try:
+                dict_str = get_definitions(word)
+            except:
+                dict_str = word
             count = 0
             temp_sum = np.zeros_like(test_vec)
             for token in dict_str:
@@ -174,12 +178,18 @@ def getInputEmbeddingsDict(puzzle_list, file_path, model_str):
 def getBERTEmbeddingsDict(puzzle_list, file_path):
     embedded_puzzles = []
     
+    out = 0
     for puzzle in puzzle_list:
+        out += 1
+        print(out)
         temp_puzzle = []
 
         for word in puzzle:
             word = word.lower()
-            word = get_definitions(word)
+            try:
+                word = get_definitions(word)
+            except:
+                word = word
             token = tokenizer.tokenize(word)
 
             word_id = tokenizer.convert_tokens_to_ids(token)
@@ -195,14 +205,14 @@ def getBERTEmbeddingsDict(puzzle_list, file_path):
         pickle.dump(embedded_puzzles, file)
 
 
-getInputEmbeddingsDict(shuffled_puzzle_list, "TestEmbeddingsv2/InputWord2Vec.pkl", "word2vec-google-news-300")
-print("Saved Word2Vec Embeddings")
-getInputEmbeddingsDict(shuffled_puzzle_list, "TestEmbeddingsv2/InputGloveWiki.pkl", "glove-wiki-gigaword-300")
-print("Saved Glove Wiki Embeddings")
-getInputEmbeddingsDict(shuffled_puzzle_list, "TestEmbeddingsv2/InputGloveTwitter.pkl", "glove-twitter-200")
-print("Saved Glove twitter embeddings")
-getBERTEmbeddingsDict(shuffled_puzzle_list, "TestEmbeddingsv2/InputBERT.pkl")
-print("Saved BERT Embeddings")
+#getInputEmbeddingsDict(shuffled_puzzle_list, "TestEmbeddingsv2/InputWord2Vec.pkl", "word2vec-google-news-300")
+#print("Saved Word2Vec Embeddings")
+#getInputEmbeddingsDict(shuffled_puzzle_list, "TestEmbeddingsv2/InputGloveWiki.pkl", "glove-wiki-gigaword-300")
+#print("Saved Glove Wiki Embeddings")
+#getInputEmbeddingsDict(shuffled_puzzle_list, "TestEmbeddingsv2/InputGloveTwitter.pkl", "glove-twitter-200")
+#print("Saved Glove twitter embeddings")
+#getBERTEmbeddingsDict(shuffled_puzzle_list, "TestEmbeddingsv2/InputBERT.pkl")
+#print("Saved BERT Embeddings")
 
 #getBERTEmbeddings(shuffled_puzzle_list, "TestEmbeddings/InputBERT.pkl")
 #print("Saved BERT Embeddings")
