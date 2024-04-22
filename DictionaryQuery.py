@@ -1,32 +1,38 @@
 import requests
 
 def get_definitions(word):
-    url = f"https://api.dictionary.com/api/v3/references/learners/json/{word}"
+    url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}"
+
     try:
         response = requests.get(url)
         response.raise_for_status() 
         data = response.json()
 
-        if isinstance(data, list):
-            definitions = []
-            for entry in data:
-                if 'shortdef' in entry:
-                    short_defs = entry['shortdef']
-                    definitions.extend(short_defs)
+        definitions = []
 
-            return '\n'.join(definitions)
+        if isinstance(data, list):
+            for entry in data:
+                if 'meanings' in entry:
+                    meanings = entry['meanings']
+
+                    for meaning in meanings:
+                        if 'definitions' in meaning:
+                            for temp in meaning['definitions']:
+                                definitions.append(temp['definition'])
+
+        if definitions:
+            return ''.join(definitions)
         
         else:
-            raise ValueError("No definitions found for this word.")
+            return "No definitions found for this word."
         
     except requests.exceptions.RequestException as e:
         raise Exception(f"Error fetching data: {e}")
 
+word = "model"
 
-# Example Usage
-# word = input("Enter a word: ")
-# try:
-#     definitions = get_definitions(word)
-#     print(f"Definitions for '{word}':\n{definitions}")
-# except Exception as e:
-#     print(f"An error occurred: {e}")
+try:
+    definitions = get_definitions(word)
+    print(f"Definitions for '{word}':\n{definitions}")
+except Exception as e:
+    print(f"An error occurred: {e}")
